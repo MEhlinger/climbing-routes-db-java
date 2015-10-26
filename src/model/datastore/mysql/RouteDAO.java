@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.*;
 
 import model.Route;
 import model.IRouteDAO;
@@ -124,7 +125,24 @@ public class RouteDAO implements IRouteDAO {
 
 	@Override
 	public List<Route> searchAllRecords(String searchString) {
+		final String QUERY = "select routeId, routeName, grade, crag from route";
 		List<Route> routesWithMatches = new ArrayList<>();
+		Pattern searchPattern = Pattern.compile(searchString);
+		
+		try (Connection con = DBConnection.getConnection(); PreparedStatement stmt = con.prepareStatement(QUERY)) {
+			ResultSet results = stmt.executeQuery(QUERY);
+			while (results.next()) {
+				Matcher nameMatcher = searchPattern.matcher(results.getString("routeName"));
+				Matcher gradeMatcher = searchPattern.matcher(results.getString("grade"));
+				Matcher cragMatcher = searchPattern.matcher(results.getString("crag"));
+				if (nameMatcher.matches() || gradeMatcher.matches() || cragMatcher.matches()) {
+					routesWithMatches.add(new Route(results.getInt("routeId"), results.getString("routeName"), results.getString("grade"), results.getString("crag")));
+				}
+			}
+		} catch (SQLException ex) {
+			System.out.println("SQLException : " + ex.getMessage());
+		}
+		
 		return routesWithMatches;
 	}
 	
@@ -141,6 +159,8 @@ public class RouteDAO implements IRouteDAO {
 				resultsList.add(results.getString("crag"));	
 			}
 			
+			// Eliminate duplicates.
+			// I'm sorry.
 			List<String> uniqueCrags = new ArrayList<>(new HashSet<>(resultsList));
 			
 			for (String cragName : uniqueCrags) {

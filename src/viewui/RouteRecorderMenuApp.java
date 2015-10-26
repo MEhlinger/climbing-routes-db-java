@@ -73,7 +73,8 @@ public class RouteRecorderMenuApp {
 				break;
 			case "6":
 				System.out.println("================================");
-				System.out.println("Future home of abstract search logic, + user input");
+				System.out.println("Search only recognizes complete matches for any one field. ");
+				System.out.println(routeList.searchAllRecords(Validator.getLine(sc, "Enter a term to search for: ")).toString());
 				break;
 			case "7":
 				System.out.println("================================");
