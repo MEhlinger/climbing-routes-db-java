@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import model.Route;
 import model.IRouteDAO;
@@ -120,6 +122,38 @@ public class RouteDAO implements IRouteDAO {
 		}
 	}
 
+	@Override
+	public List<Route> searchAllRecords(String searchString) {
+		List<Route> routesWithMatches = new ArrayList<>();
+		return routesWithMatches;
+	}
+	
+	@Override
+	public String listAllCrags() {
+		final String QUERY = "select crag from route";
+		StringBuilder sb = new StringBuilder();
+		
+		try (Connection con = DBConnection.getConnection(); PreparedStatement stmt = con.prepareStatement(QUERY)) {
+			ResultSet results = stmt.executeQuery(QUERY);
+			List<String> resultsList = new ArrayList<>();
+			
+			while (results.next()) {
+				resultsList.add(results.getString("crag"));	
+			}
+			
+			List<String> uniqueCrags = new ArrayList<>(new HashSet<>(resultsList));
+			
+			for (String cragName : uniqueCrags) {
+				sb.append("+	" + cragName + "\n");
+			}
+			return sb.toString();
+		} catch (SQLException ex) {
+			System.out.println("listAllCrags SQLException: " + ex.getMessage());
+		}
+		
+		return "Error -- uncaught exception in listAllCrags. This string should never be returned.";
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
